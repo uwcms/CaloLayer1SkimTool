@@ -15,7 +15,7 @@ from Configuration.StandardSequences.Eras import eras
 process = cms.Process('SKIM'+('2' if options.printout else ''), eras.Run2_25ns)
 
 process.options = cms.untracked.PSet(
-    allowUnscheduled = cms.untracked.bool(True),
+    allowUnscheduled = cms.untracked.bool(False),
     wantSummary = cms.untracked.bool(True),
 )
 
@@ -48,7 +48,8 @@ process.mismatchFilter = cms.EDFilter("CaloLayer1MismatchFilter",
     ecalTPSourceRecd = cms.InputTag("l1tCaloLayer1Digis"),
     hcalTPSourceRecd = cms.InputTag("l1tCaloLayer1Digis"),
     filterEcalMismatch = cms.bool(True),
-    filterHcalMismatch = cms.bool(True),
+    filterHcalMismatch = cms.bool(False),
+    printout = cms.bool(options.printout),
 )
 
 process.skimPath = cms.Path(

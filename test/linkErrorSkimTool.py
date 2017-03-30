@@ -15,7 +15,7 @@ from Configuration.StandardSequences.Eras import eras
 process = cms.Process('SKIM'+('2' if options.printout else ''), eras.Run2_25ns)
 
 process.options = cms.untracked.PSet(
-    allowUnscheduled = cms.untracked.bool(True),
+    allowUnscheduled = cms.untracked.bool(False),
     wantSummary = cms.untracked.bool(True),
 )
 
