@@ -63,6 +63,8 @@ class CaloLayer1MismatchFilter : public edm::stream::EDFilter<> {
 
     bool filterEcalMismatch_;
     bool filterHcalMismatch_;
+    bool filterEcalLinkErrors_;
+    bool filterHcalLinkErrors_;
     bool printout_;
 
     std::vector<std::pair<EcalTriggerPrimitiveDigi, EcalTriggerPrimitiveDigi> > ecalTPSentRecd_;
@@ -87,6 +89,8 @@ CaloLayer1MismatchFilter::CaloLayer1MismatchFilter(const edm::ParameterSet& ps):
   hcalTPSourceRecd_(consumes<HcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("hcalTPSourceRecd"))),
   filterEcalMismatch_(ps.getParameter<bool>("filterEcalMismatch")),
   filterHcalMismatch_(ps.getParameter<bool>("filterHcalMismatch")),
+  filterEcalLinkErrors_(ps.getParameter<bool>("filterEcalLinkErrors")),
+  filterHcalLinkErrors_(ps.getParameter<bool>("filterHcalLinkErrors")),
   printout_(ps.getParameter<bool>("printout"))
 {
   ecalTPSentRecd_.reserve(28*2*72);
@@ -111,6 +115,7 @@ CaloLayer1MismatchFilter::~CaloLayer1MismatchFilter()
 bool
 CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetup)
 {
+  std::cout << "Orbit #:" << event.orbitNumber() << std::endl;
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPsSent;
   event.getByToken(ecalTPSourceSent_, ecalTPsSent);
   bool tccFullReadout = ( ecalTPsSent->size() == 28*72*2 );
@@ -145,7 +150,11 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
     const bool linkMasked  = recdTp.sample(0).raw() & (1<<14);
     const bool linkError   = recdTp.sample(0).raw() & (1<<15);
 
-    if ( linkError ) nEcalLinkErrors++;
+    if ( linkError ) {
+      nEcalLinkErrors++;
+      if ( printout_ ) std::cout << "Found ECAL link error at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+    }
+
     if ( sentTp.compressedEt() == recdTp.compressedEt() && sentTp.fineGrain() == recdTp.fineGrain() ) {
       // Full match
     }
@@ -172,7 +181,11 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
     const bool linkMasked  = recdTp.sample(0).raw() & (1<<14);
     const bool linkError   = recdTp.sample(0).raw() & (1<<15);
 
-    if ( linkError ) nHcalLinkErrors++;
+    if ( linkError ) {
+      nHcalLinkErrors++;
+      if ( printout_ ) std::cout << "Found HCAL link error at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+    }
+
     if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() ) {
       // Full match
     }
@@ -191,6 +204,8 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
 
   if ( nEcalMismatch > 0 && filterEcalMismatch_ ) return true;
   if ( nHcalMismatch > 0 && filterHcalMismatch_ ) return true;
+  if ( nEcalLinkErrors > 0 && filterEcalLinkErrors_ ) return true;
+  if ( nHcalLinkErrors > 0 && filterHcalLinkErrors_ ) return true;
   return false;
 }
 

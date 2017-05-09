@@ -49,6 +49,8 @@ process.mismatchFilter = cms.EDFilter("CaloLayer1MismatchFilter",
     hcalTPSourceRecd = cms.InputTag("l1tCaloLayer1Digis"),
     filterEcalMismatch = cms.bool(True),
     filterHcalMismatch = cms.bool(False),
+    filterEcalLinkErrors = cms.bool(True),
+    filterHcalLinkErrors = cms.bool(False),
     printout = cms.bool(options.printout),
 )
 
