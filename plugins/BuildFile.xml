@@ -4,4 +4,6 @@
 <use name="DQMServices/Core"/>
 <use name="DataFormats/EcalDigi"/>
 <use name="DataFormats/HcalDigi"/>
+<use name="DataFormats/FEDRawData"/>
+<use name="EventFilter/FEDInterface"/>
 <flags EDM_PLUGIN="1"/>

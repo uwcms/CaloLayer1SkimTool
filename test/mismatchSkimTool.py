@@ -3,6 +3,34 @@ import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 options.register(
+    "ecalMsm",
+    False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Filter ECAL mismatches"
+)
+options.register(
+    "hcalMsm",
+    False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Filter HCAL mismatches"
+)
+options.register(
+    "ecalErr",
+    False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Filter ECAL link errors"
+)
+options.register(
+    "hcalErr",
+    False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Filter HCAL link errors"
+)
+options.register(
     "printout",
     False,
     VarParsing.multiplicity.singleton,
@@ -47,10 +75,11 @@ process.mismatchFilter = cms.EDFilter("CaloLayer1MismatchFilter",
     hcalTPSourceSent = cms.InputTag("hcalDigis"),
     ecalTPSourceRecd = cms.InputTag("l1tCaloLayer1Digis"),
     hcalTPSourceRecd = cms.InputTag("l1tCaloLayer1Digis"),
-    filterEcalMismatch = cms.bool(True),
-    filterHcalMismatch = cms.bool(False),
-    filterEcalLinkErrors = cms.bool(True),
-    filterHcalLinkErrors = cms.bool(False),
+    fedRawData = cms.InputTag("rawDataCollector"),
+    filterEcalMismatch = cms.bool(options.ecalMsm),
+    filterHcalMismatch = cms.bool(options.hcalMsm),
+    filterEcalLinkErrors = cms.bool(options.ecalErr),
+    filterHcalLinkErrors = cms.bool(options.hcalErr),
     printout = cms.bool(options.printout),
 )
 

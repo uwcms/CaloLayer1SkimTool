@@ -34,6 +34,9 @@
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 
+#include "DataFormats/FEDRawData/interface/FEDHeader.h"
+#include "EventFilter/FEDInterface/interface/FED1024.h"
+
 //
 // class declaration
 //
@@ -60,6 +63,7 @@ class CaloLayer1MismatchFilter : public edm::stream::EDFilter<> {
     edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalTPSourceSent_;
     edm::EDGetTokenT<EcalTrigPrimDigiCollection> ecalTPSourceRecd_;
     edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalTPSourceRecd_;
+    edm::EDGetTokenT<FEDRawDataCollection> fedData_;
 
     bool filterEcalMismatch_;
     bool filterHcalMismatch_;
@@ -87,6 +91,7 @@ CaloLayer1MismatchFilter::CaloLayer1MismatchFilter(const edm::ParameterSet& ps):
   hcalTPSourceSent_(consumes<HcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("hcalTPSourceSent"))),
   ecalTPSourceRecd_(consumes<EcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("ecalTPSourceRecd"))),
   hcalTPSourceRecd_(consumes<HcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("hcalTPSourceRecd"))),
+  fedData_(consumes<FEDRawDataCollection>(ps.getParameter<edm::InputTag>("fedRawData"))),
   filterEcalMismatch_(ps.getParameter<bool>("filterEcalMismatch")),
   filterHcalMismatch_(ps.getParameter<bool>("filterHcalMismatch")),
   filterEcalLinkErrors_(ps.getParameter<bool>("filterEcalLinkErrors")),
@@ -115,7 +120,14 @@ CaloLayer1MismatchFilter::~CaloLayer1MismatchFilter()
 bool
 CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetup)
 {
-  if ( printout_ ) std::cout << "Addl. event info: bx=" << event.bunchCrossing() << ", orbit=" << event.orbitNumber() << std::endl;
+  if ( printout_ ) {
+    edm::Handle<FEDRawDataCollection> feds;
+    event.getByToken(fedData_, feds);
+    const FEDRawData& tcdsData = feds->FEDData(1024);
+    evf::evtn::TCDSRecord record(tcdsData.data());
+    uint64_t l1a = record.getHeader().getData().header.triggerCount;
+    std::cout << "Addl. event info: bx=" << event.bunchCrossing() << ", orbit=" << event.orbitNumber() << ", l1a=" << l1a << std::endl;
+  }
 
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPsSent;
   event.getByToken(ecalTPSourceSent_, ecalTPsSent);
