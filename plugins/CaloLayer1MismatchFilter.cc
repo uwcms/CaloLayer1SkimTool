@@ -115,7 +115,8 @@ CaloLayer1MismatchFilter::~CaloLayer1MismatchFilter()
 bool
 CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetup)
 {
-  std::cout << "Orbit #:" << event.orbitNumber() << std::endl;
+  if ( printout_ ) std::cout << "Addl. event info: bx=" << event.bunchCrossing() << ", orbit=" << event.orbitNumber() << std::endl;
+
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPsSent;
   event.getByToken(ecalTPSourceSent_, ecalTPsSent);
   bool tccFullReadout = ( ecalTPsSent->size() == 28*72*2 );
@@ -167,9 +168,9 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
     else {
       nEcalMismatch++;
       if ( printout_ && filterEcalMismatch_ ) {
-        std::cout << "Found ECAL TP mismatch at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
-        std::cout << "\tSent TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << sentTp.sample(0).raw() << std::endl;
-        std::cout << "\tRecd TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << recdTp.sample(0).raw() << std::endl;
+        std::cout << "Found ECAL TP mismatch at ieta=" << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+        std::cout << "\tSent TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << sentTp.sample(0).raw() << std::dec << std::endl;
+        std::cout << "\tRecd TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << recdTp.sample(0).raw() << std::dec << std::endl;
       }
     }
   }
@@ -183,7 +184,7 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
 
     if ( linkError ) {
       nHcalLinkErrors++;
-      if ( printout_ ) std::cout << "Found HCAL link error at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+      if ( printout_ ) std::cout << "Found HCAL link error at ieta=" << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
     }
 
     if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() ) {
@@ -196,8 +197,9 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
       nHcalMismatch++;
       if ( printout_ && filterHcalMismatch_ ) {
         std::cout << "Found HCAL TP mismatch at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
-        std::cout << "\tSent TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << sentTp.sample(0).raw() << std::endl;
-        std::cout << "\tRecd TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << recdTp.sample(0).raw() << std::endl;
+        std::cout << "\tSent TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << sentTp.sample(sentTp.presamples()).raw() << std::dec << std::endl;
+        std::cout << "\tRecd TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << recdTp.sample(0).raw() << std::dec << std::endl;
+        std::cout << "\tAddl sent TP info:" << std::endl << sentTp << "-------" << std::endl;
       }
     }
   }
