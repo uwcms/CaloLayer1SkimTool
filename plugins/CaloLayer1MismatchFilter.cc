@@ -165,7 +165,7 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
 
     if ( linkError ) {
       nEcalLinkErrors++;
-      if ( printout_ ) std::cout << "Found ECAL link error at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+      if ( printout_ && filterEcalLinkErrors_ ) std::cout << "Found ECAL link error at ieta=" << std::dec << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
     }
 
     if ( sentTp.compressedEt() == recdTp.compressedEt() && sentTp.fineGrain() == recdTp.fineGrain() ) {
@@ -196,10 +196,10 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
 
     if ( linkError ) {
       nHcalLinkErrors++;
-      if ( printout_ ) std::cout << "Found HCAL link error at ieta=" << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
+      if ( printout_ && filterHcalLinkErrors_ ) std::cout << "Found HCAL link error at ieta=" << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
     }
 
-    if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() ) {
+    if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() && sentTp.SOI_fineGrain(1) == recdTp.SOI_fineGrain(1) ) {
       // Full match
     }
     else if ( towerMasked || linkMasked ) {
