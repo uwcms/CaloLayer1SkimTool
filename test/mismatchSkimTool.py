@@ -4,28 +4,28 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 options.register(
     "ecalMsm",
-    False,
+    True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Filter ECAL mismatches"
 )
 options.register(
     "hcalMsm",
-    False,
+    True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Filter HCAL mismatches"
 )
 options.register(
     "ecalErr",
-    False,
+    True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Filter ECAL link errors"
 )
 options.register(
     "hcalErr",
-    False,
+    True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Filter HCAL link errors"
