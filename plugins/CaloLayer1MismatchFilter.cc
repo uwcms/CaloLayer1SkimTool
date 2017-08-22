@@ -120,7 +120,7 @@ CaloLayer1MismatchFilter::~CaloLayer1MismatchFilter()
 bool
 CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetup)
 {
-  if ( printout_ ) {
+  if ( false and printout_ ) {
     edm::Handle<FEDRawDataCollection> feds;
     event.getByToken(fedData_, feds);
     const FEDRawData& tcdsData = feds->FEDData(1024);
@@ -142,11 +142,16 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
 
   edm::Handle<HcalTrigPrimDigiCollection> hcalTPsSent;
   event.getByToken(hcalTPSourceSent_, hcalTPsSent);
+  HcalTrigPrimDigiCollection hcalTPsSentCleaned;
+  for(auto&& tp : *hcalTPsSent) {
+    if ( tp.id().version() == 0 and std::abs(tp.id().ieta()) > 28 ) continue;
+    hcalTPsSentCleaned.push_back(tp);
+  }
   edm::Handle<HcalTrigPrimDigiCollection> hcalTPsRecd;
   event.getByToken(hcalTPSourceRecd_, hcalTPsRecd);
 
   hcalTPSentRecd_.clear();
-  ComparisonHelper::zip(hcalTPsSent->begin(), hcalTPsSent->end(), 
+  ComparisonHelper::zip(hcalTPsSentCleaned.begin(), hcalTPsSentCleaned.end(), 
                         hcalTPsRecd->begin(), hcalTPsRecd->end(), 
                         std::inserter(hcalTPSentRecd_, hcalTPSentRecd_.begin()), HcalTrigPrimDigiCollection::key_compare());
 
@@ -199,7 +204,9 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
       if ( printout_ && filterHcalLinkErrors_ ) std::cout << "Found HCAL link error at ieta=" << sentTp.id().ieta() << ", iphi=" << sentTp.id().iphi() << std::endl;
     }
 
-    if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() && sentTp.SOI_fineGrain(1) == recdTp.SOI_fineGrain(1) ) {
+    if ( sentTp.SOI_compressedEt() == recdTp.SOI_compressedEt() && sentTp.SOI_fineGrain() == recdTp.SOI_fineGrain() && 
+          (sentTp.SOI_fineGrain(1) == recdTp.SOI_fineGrain(1) or std::abs(sentTp.id().ieta()) <= 28)
+       ) {
       // Full match
     }
     else if ( towerMasked || linkMasked ) {
@@ -212,6 +219,7 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
         std::cout << "\tSent TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << sentTp.sample(sentTp.presamples()).raw() << std::dec << std::endl;
         std::cout << "\tRecd TP raw: 0x" << std::internal << std::setfill('0') << std::setw(4) << std::hex << recdTp.sample(0).raw() << std::dec << std::endl;
         std::cout << "\tAddl sent TP info:" << std::endl << sentTp << "-------" << std::endl;
+        std::cout << "\tAddl recd TP info:" << std::endl << recdTp << "-------" << std::endl;
       }
     }
   }
