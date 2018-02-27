@@ -35,7 +35,7 @@
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 
 #include "DataFormats/FEDRawData/interface/FEDHeader.h"
-#include "EventFilter/FEDInterface/interface/FED1024.h"
+#include "DataFormats/TCDS/interface/TCDSRecord.h"
 
 //
 // class declaration
@@ -124,9 +124,8 @@ CaloLayer1MismatchFilter::filter(edm::Event& event, const edm::EventSetup& iSetu
     edm::Handle<FEDRawDataCollection> feds;
     event.getByToken(fedData_, feds);
     const FEDRawData& tcdsData = feds->FEDData(1024);
-    evf::evtn::TCDSRecord record(tcdsData.data());
-    uint64_t l1a = record.getHeader().getData().header.triggerCount;
-    std::cout << "Addl. event info: bx=" << event.bunchCrossing() << ", orbit=" << event.orbitNumber() << ", l1a=" << l1a << std::endl;
+    TCDSRecord tcds(tcdsData.data());
+    std::cout << "Addl. event info: bx=" << event.bunchCrossing() << ", orbit=" << event.orbitNumber() << ", l1a=" << tcds.getTriggerCount() << std::endl;
   }
 
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPsSent;

@@ -40,7 +40,7 @@ options.register(
 options.parseArguments()
 
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process('SKIM'+('2' if options.printout else ''), eras.Run2_25ns)
+process = cms.Process('SKIM'+('2' if options.printout else ''), eras.Run2_2018)
 
 process.options = cms.untracked.PSet(
     allowUnscheduled = cms.untracked.bool(False),
@@ -62,7 +62,8 @@ process.source = cms.Source("PoolSource",
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "90X_dataRun2_HLT_v1"
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 # Required to load EcalMappingRecord
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
